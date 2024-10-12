@@ -44,6 +44,9 @@ export class SearchService {
     const docs = await this.url.findMany({
       where: {
         indexed: false,
+        lastTested: {
+          not: null,
+        },
       },
     });
 
