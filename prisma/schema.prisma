@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CrawledUrl {
+  id              String      @id @default(uuid())
+  url             String      @unique
+  success         Boolean?
+  crawlDuration   Float       @default(0)
+  responseCode    Int         @default(0)
+  pageTitle       String?
+  pageDescription String?
+  heading         String?
+  lastTested      DateTime?
+  indexed         Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+  IndexUrls       IndexUrls[]
+}
+
+model SearchIndex {
+  id    String @id @default(uuid())
+  value String
+
+  urls IndexUrls[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model IndexUrls {
+  searchIndex   SearchIndex @relation(fields: [searchIndexId], references: [id])
+  url           CrawledUrl  @relation(fields: [urlId], references: [id])
+  searchIndexId String
+  urlId         String      @map("urlId")
+
+  @@id([searchIndexId, urlId])
+}

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "CrawledUrl" ALTER COLUMN "crawlDuration" SET DATA TYPE DOUBLE PRECISION;
