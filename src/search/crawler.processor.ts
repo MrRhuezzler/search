@@ -86,8 +86,6 @@ const Crawl = async (
   try {
     const url = new URL(urlString);
 
-    console.log(url.href);
-
     const [response] = await Promise.all([
       page.waitForResponse((res) => res.url() === url.href, {
         timeout: 90_000,
@@ -102,8 +100,6 @@ const Crawl = async (
         success: false,
       });
     }
-
-    console.log(response.headers());
 
     const contentType = response.headers()['content-type'];
     if (contentType.includes('text/html')) {
