@@ -1,7 +1,0 @@
--- AlterTable
-ALTER TABLE "CrawledUrl" ALTER COLUMN "success" SET DEFAULT false,
-ALTER COLUMN "crawlDuration" SET DEFAULT 0,
-ALTER COLUMN "responseCode" SET DEFAULT 0,
-ALTER COLUMN "pageTitle" DROP NOT NULL,
-ALTER COLUMN "pageDescription" DROP NOT NULL,
-ALTER COLUMN "heading" DROP NOT NULL;
