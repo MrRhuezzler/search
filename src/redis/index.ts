@@ -12,6 +12,7 @@ export const DBRedisModule = CustomRedisModule.registerAsync({
     connectionOptions: {
       host: config.get('REDIS_HOST'),
       port: config.get('REDIS_PORT'),
+      family: Number(config.get('REDIS_FAMILY') ?? '0'),
       db: Number(config.get('REDIS_DB_DATABASE') ?? '0'),
       onClientReady: async (client: Redis, logger?: Logger) => {
         logger.log('Connected to redis instance');
