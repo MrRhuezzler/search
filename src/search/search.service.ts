@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, Timeout } from '@nestjs/schedule';
 import Crawl from './crawler.processor';
 import { AppService } from 'src/app.service';
 import { UrlService } from 'src/url/url.service';
@@ -38,6 +38,7 @@ export class SearchService {
     });
   }
 
+  // @Timeout(2000)
   @Cron('20 * * * *')
   async indexEngine() {
     this.logger.verbose('Indexing started');
@@ -52,25 +53,32 @@ export class SearchService {
 
     await this.addDocuments(docs);
 
-    const promises = [];
     const indexUrls = [];
 
     for (const [token, urlSet] of this.memIndex.entries()) {
       const urlIds = Array.from(urlSet);
       indexUrls.push(...urlIds);
-      promises.push(
-        this.index.create({
-          value: token, // The token (word)
+      await this.index.upsert({
+        create: {
+          value: token,
           urls: {
             create: urlIds.map((urlId) => ({
               urlId, // Each associated URL ID
             })),
           },
-        }),
-      );
+        },
+        update: {
+          urls: {
+            create: urlIds.map((urlId) => ({
+              urlId, // Each associated URL ID
+            })),
+          },
+        },
+        where: {
+          value: token,
+        },
+      });
     }
-
-    await Promise.all(promises);
 
     const chunckedUrls = chunk(indexUrls, 32000);
     const transactions = chunckedUrls.map((ids) => {
@@ -90,6 +98,7 @@ export class SearchService {
     this.logger.verbose('Indexing completed');
   }
 
+  // @Timeout(2000)
   @Cron('0 * * * *')
   async crawlEngine() {
     this.logger.verbose('Crawling started');
@@ -104,14 +113,14 @@ export class SearchService {
 
     const crawlUrls = await this.url.getNextCrawlUrls(settings.amount);
 
-    const crawlPromises = crawlUrls.map(async (crawlUrl) => {
+    for (const crawlUrl of crawlUrls) {
       const result = await Crawl(this.browser, crawlUrl.url);
       if (result.success) {
         newUrls.push(...(result?.parsedBody?.links.external ?? []));
         newUrls.push(...(result?.parsedBody?.links.internal ?? []));
       }
 
-      return this.url.update({
+      await this.url.update({
         data: {
           success: result.success,
           crawlDuration: result.parsedBody?.crawlTime ?? 0,
@@ -125,23 +134,23 @@ export class SearchService {
           id: crawlUrl.id,
         },
       });
-    });
-
-    await Promise.all(crawlPromises);
+    }
 
     if (!settings.addNew) {
       return;
     }
 
-    const promises = newUrls.map(async (newUrl) =>
-      this.url.create({
-        data: {
-          url: newUrl,
-        },
-      }),
-    );
+    try {
+      const promises = newUrls.map(async (newUrl) =>
+        this.url.create({
+          data: {
+            url: newUrl,
+          },
+        }),
+      );
+      await Promise.all(promises);
+    } catch {}
 
-    await Promise.all(promises);
     this.logger.verbose('Crawling completed');
   }
 }

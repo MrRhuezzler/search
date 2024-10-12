@@ -35,7 +35,7 @@ model CrawledUrl {
 
 model SearchIndex {
   id    String @id @default(uuid())
-  value String
+  value String @unique
 
   urls IndexUrls[]
 

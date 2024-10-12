@@ -10,6 +10,10 @@ export class SearchIndexService {
     return this.prisma.searchIndex.create({ data });
   }
 
+  async upsert(args: Prisma.SearchIndexUpsertArgs) {
+    return this.prisma.searchIndex.upsert(args);
+  }
+
   async fullTextSearch(value: string) {
     const terms = value.split(' ');
     let urls = [];
