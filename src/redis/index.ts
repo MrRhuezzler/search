@@ -10,8 +10,10 @@ export const DBRedisModule = CustomRedisModule.registerAsync({
   imports: [ConfigModule],
   useFactory: async (config: ConfigService) => ({
     connectionOptions: {
-      host: config.get('REDIS_HOST'),
-      port: config.get('REDIS_PORT'),
+      host: config.getOrThrow('REDIS_HOST'),
+      port: config.getOrThrow('REDIS_PORT'),
+      username: config.getOrThrow('REDIS_USER'),
+      password: config.getOrThrow('REDIS_PASSWORD'),
       family: Number(config.get('REDIS_FAMILY') ?? '0'),
       db: Number(config.get('REDIS_DB_DATABASE') ?? '0'),
       onClientReady: async (client: Redis, logger?: Logger) => {
