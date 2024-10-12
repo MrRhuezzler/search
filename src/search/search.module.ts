@@ -9,6 +9,7 @@ import { SearchIndexModule } from 'src/search-index/search-index.module';
     UrlModule,
     PuppeteerModule.forRoot({
       headless: 'shell',
+      args: ['--no-sandbox'],
     }),
     SearchIndexModule,
   ],
