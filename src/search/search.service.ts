@@ -58,26 +58,28 @@ export class SearchService {
     for (const [token, urlSet] of this.memIndex.entries()) {
       const urlIds = Array.from(urlSet);
       indexUrls.push(...urlIds);
-      await this.index.upsert({
-        create: {
-          value: token,
-          urls: {
-            create: urlIds.map((urlId) => ({
-              urlId, // Each associated URL ID
-            })),
+      try {
+        await this.index.upsert({
+          create: {
+            value: token,
+            urls: {
+              create: urlIds.map((urlId) => ({
+                urlId, // Each associated URL ID
+              })),
+            },
           },
-        },
-        update: {
-          urls: {
-            create: urlIds.map((urlId) => ({
-              urlId, // Each associated URL ID
-            })),
+          update: {
+            urls: {
+              create: urlIds.map((urlId) => ({
+                urlId, // Each associated URL ID
+              })),
+            },
           },
-        },
-        where: {
-          value: token,
-        },
-      });
+          where: {
+            value: token,
+          },
+        });
+      } catch (err) {}
     }
 
     const chunckedUrls = chunk(indexUrls, 32000);
