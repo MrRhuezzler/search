@@ -27,6 +27,7 @@ export class UserModule implements OnModuleInit {
       this.logger.verbose('Admin user added');
       await this.user.create({
         data: {
+          role: 'ADMIN',
           email: this.config.get('ADMIN_USER_EMAIL'),
           password: this.config.get('ADMIN_USER_PASSWORD'),
         },
