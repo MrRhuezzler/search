@@ -8,7 +8,16 @@ const analyze = (text: string): string[] => {
   return tokens;
 };
 
+export const analyzeWithoutStemming = (text: string): string[] => {
+  let tokens = tokenize(text);
+  tokens = lowercaseFilter(tokens);
+  tokens = stopwordFilter(tokens);
+  return tokens;
+};
+
 const tokenize = (text: string): string[] => {
+  // const tokenizer = new natural.WordTokenizer();
+  // return tokenizer.tokenize(text);
   return text.split(/[^a-zA-Z0-9]+/).filter(Boolean);
 };
 

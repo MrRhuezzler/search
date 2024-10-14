@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import analyze, {
+  analyzeWithoutStemming,
+} from 'src/search/tokenizer.processor';
 
 @Injectable()
 export class SearchIndexService {
+  private readonly logger = new Logger(SearchIndexService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(data: Prisma.SearchIndexUncheckedCreateInput) {
@@ -15,7 +20,10 @@ export class SearchIndexService {
   }
 
   async fullTextSearch(value: string) {
-    const terms = value.split(' ');
+    const termsWithStemming = analyze(value);
+    const termsWithoutStemmed = analyzeWithoutStemming(value);
+    const terms = [...termsWithStemming, ...termsWithoutStemmed];
+
     let urls = [];
 
     for (const term of terms) {
