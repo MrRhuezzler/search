@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { SettingsUpdateDto } from './dto/settings.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -32,29 +32,23 @@ export class AppProtectedController {
     return this.app.updateSettings(body);
   }
 
-  // @Post('engine/crawl')
-  // @AllowedRoles([UserRole.ADMIN])
-  // async requestCrawling() {
-  //   try {
-  //     this.scheduler.deleteTimeout('crawl');
-  //   } catch (err) {
-  //   } finally {
-  //     this.scheduler.addTimeout(
-  //       'crawl',
-  //       setTimeout(() => this.search.crawlEngine.bind(this.search), 100),
-  //     );
-  //   }
+  @Post('engine/crawl')
+  @AllowedRoles([UserRole.ADMIN])
+  async requestCrawling() {
+    this.scheduler.addTimeout(
+      'crawl',
+      setTimeout(this.search.crawlEngine.bind(this.search), 100),
+    );
+    return {};
+  }
 
-  //   return {};
-  // }
-
-  // @Post('engine/index')
-  // @AllowedRoles([UserRole.ADMIN])
-  // async requestIndexing() {
-  //   this.scheduler.deleteTimeout('index');
-  //   this.scheduler.addTimeout(
-  //     'index',
-  //     setTimeout(this.search.indexEngine, 100),
-  //   );
-  // }
+  @Post('engine/index')
+  @AllowedRoles([UserRole.ADMIN])
+  async requestIndexing() {
+    this.scheduler.deleteTimeout('index');
+    this.scheduler.addTimeout(
+      'index',
+      setTimeout(this.search.indexEngine.bind(this.search), 100),
+    );
+  }
 }
