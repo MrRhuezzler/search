@@ -35,20 +35,28 @@ export class AppProtectedController {
   @Post('engine/crawl')
   @AllowedRoles([UserRole.ADMIN])
   async requestCrawling() {
-    this.scheduler.addTimeout(
-      'crawl',
-      setTimeout(this.search.crawlEngine.bind(this.search), 100),
-    );
+    try {
+      this.scheduler.deleteTimeout('crawl');
+    } finally {
+      this.scheduler.addTimeout(
+        'crawl',
+        setTimeout(this.search.crawlEngine.bind(this.search), 100),
+      );
+    }
     return {};
   }
 
   @Post('engine/index')
   @AllowedRoles([UserRole.ADMIN])
   async requestIndexing() {
-    this.scheduler.deleteTimeout('index');
-    this.scheduler.addTimeout(
-      'index',
-      setTimeout(this.search.indexEngine.bind(this.search), 100),
-    );
+    try {
+      this.scheduler.deleteTimeout('index');
+    } finally {
+      this.scheduler.addTimeout(
+        'index',
+        setTimeout(this.search.indexEngine.bind(this.search), 100),
+      );
+    }
+    return {};
   }
 }
